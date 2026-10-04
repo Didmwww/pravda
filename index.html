@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Правда чи Дія?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --text: #4a3340;
+    --text-soft: #8a6b78;
+    --truth-1: #ffb3c7;
+    --truth-2: #ff8fb1;
+    --dare-1: #ffd27a;
+    --dare-2: #ffa95c;
+    --radius: 28px;
+    --flip-time: 0.8s;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body { min-height: 100%; }
+
+  body {
+    font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: clamp(24px, 6vh, 56px) 18px calc(28px + env(safe-area-inset-bottom));
+    /* Анімований м'який градієнт: персиковий, рожевий, пастельно-жовтий, теплий білий */
+    background: linear-gradient(120deg, #ffb6cc, #ff9fbd, #ffa7a0, #ffb07a, #ff9a5c, #ffa88e, #ffb6cc);
+    background-size: 400% 400%;
+    animation: bgFlow 18s ease infinite;
+    overflow-x: hidden;
+  }
+
+  @keyframes bgFlow {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* ---------- Заголовок ---------- */
+  header { text-align: center; margin-bottom: clamp(22px, 5vh, 48px); }
+
+  h1 {
+    font-size: clamp(2rem, 7vw, 3.6rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #fff;
+    text-shadow: 0 4px 18px rgba(170, 60, 70, 0.35);
+  }
+
+  .subtitle {
+    margin-top: 8px;
+    font-size: clamp(0.85rem, 2.5vw, 1rem);
+    font-weight: 500;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(170, 60, 70, 0.3);
+  }
+
+  /* ---------- Картки ---------- */
+  .board {
+    width: 100%;
+    max-width: 880px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(16px, 3vw, 32px);
+    flex: 1;
+    align-content: start;
+  }
+
+  .card {
+    perspective: 1400px;
+    height: clamp(300px, 52vh, 420px);
+    cursor: pointer;
+    outline: none;
+    transition: transform 0.35s ease, opacity 0.4s ease;
+  }
+
+  /* Ефект "підвішування" при наведенні */
+  @media (hover: hover) {
+    .card:not(.flipped):hover { transform: translateY(-10px); }
+    .card:not(.flipped):hover .face { box-shadow: 0 26px 40px -12px rgba(120, 60, 70, 0.32); }
+  }
+  .card:focus-visible .face { box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9), 0 18px 34px -12px rgba(120, 60, 70, 0.3); }
+  .card:active:not(.flipped) { transform: translateY(-4px) scale(0.99); }
+
+  /* Інша картка трохи притухає, поки одна перевернута */
+  .board.has-flipped .card:not(.flipped) { opacity: 0.55; pointer-events: none; transform: scale(0.97); }
+
+  .inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform var(--flip-time) cubic-bezier(0.4, 0.15, 0.2, 1.1);
+  }
+  .card.flipped .inner { transform: rotateY(180deg); }
+
+  .face {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    box-shadow: 0 16px 30px -14px rgba(120, 60, 70, 0.28);
+    transition: box-shadow 0.35s ease;
+    overflow: hidden;
+  }
+
+  /* Блиск на картках */
+  .face::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 25% 15%, rgba(255, 255, 255, 0.55), transparent 55%);
+    pointer-events: none;
+  }
+
+  .truth .front, .truth .back { background: linear-gradient(145deg, var(--truth-1), var(--truth-2)); }
+  .dare  .front, .dare  .back { background: linear-gradient(145deg, var(--dare-1), var(--dare-2)); }
+
+  .front { color: #fff; }
+  .front .emoji { font-size: clamp(2.8rem, 9vw, 4rem); margin-bottom: 14px; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.12)); }
+  .front .label {
+    font-size: clamp(1.6rem, 5vw, 2.3rem);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-shadow: 0 3px 12px rgba(120, 50, 60, 0.25);
+  }
+  .front .left {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    opacity: 0.9;
+    letter-spacing: 0.04em;
+  }
+
+  .back { transform: rotateY(180deg); color: #4a2f3a; }
+  .back .kind {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 14px;
+  }
+  .back .text {
+    font-size: clamp(1.05rem, 3.6vw, 1.4rem);
+    font-weight: 700;
+    line-height: 1.4;
+    max-height: 62%;
+    overflow-y: auto;
+    padding: 0 4px;
+  }
+
+  .next-btn {
+    margin-top: 22px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #4a2f3a;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 12px 26px;
+    border-radius: 999px;
+    box-shadow: 0 8px 18px -8px rgba(90, 40, 50, 0.4);
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+  .next-btn:hover { transform: translateY(-2px); background: #fff; }
+  .next-btn:active { transform: scale(0.96); }
+
+  /* Тряска, коли питання закінчилися */
+  .card.shake { animation: shake 0.5s ease; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-9px) rotate(-1deg); }
+    40% { transform: translateX(8px) rotate(1deg); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(4px); }
+  }
+  .card.empty .front { filter: saturate(0.5); }
+
+  /* ---------- Сповіщення ---------- */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(26px + env(safe-area-inset-bottom));
+    transform: translate(-50%, 30px);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text);
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 14px 24px;
+    border-radius: 18px;
+    box-shadow: 0 18px 36px -12px rgba(120, 60, 70, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    z-index: 10;
+    max-width: calc(100vw - 36px);
+    text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ---------- Адаптивність ---------- */
+  @media (max-width: 640px) {
+    .board { grid-template-columns: 1fr; }
+    .card { height: clamp(220px, 36vh, 300px); }
+    .back .text { max-height: 58%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    body { animation: none; }
+    .inner { transition-duration: 0.01s; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Правда чи Дія?</h1>
+  <p class="subtitle">Обирай картку — і хай щастить 🎉</p>
+</header>
+
+<main class="board" id="board">
+
+  <!-- Картка ПРАВДА -->
+  <div class="card truth" id="card-truth" role="button" tabindex="0" aria-label="Правда">
+    <div class="inner">
+      <div class="face front">
+        <div class="emoji">💗</div>
+        <div class="label">ПРАВДА</div>
+        <div class="left" id="left-truth"></div>
+      </div>
+      <div class="face back">
+        <div class="kind">Правда</div>
+        <div class="text" id="text-truth"></div>
+        <button class="next-btn" type="button">Грати далі</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Картка ДІЯ -->
+  <div class="card dare" id="card-dare" role="button" tabindex="0" aria-label="Дія">
+    <div class="inner">
+      <div class="face front">
+        <div class="emoji">😈</div>
+        <div class="label">ДІЯ</div>
+        <div class="left" id="left-dare"></div>
+      </div>
+      <div class="face back">
+        <div class="kind">Дія</div>
+        <div class="text" id="text-dare"></div>
+        <button class="next-btn" type="button">Грати далі</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  /* =====================================================
+     ПИТАННЯ ДЛЯ "ПРАВДИ"
+     Щоб замінити список — просто змініть рядки нижче.
+     Кожен елемент — окремий рядок у лапках, через кому.
+     ===================================================== */
+  const truths = [
+    "Який твій найбільш смішний момент за останній рік?",
+    "Яка твоя улюблена пісня зараз?",
+    "Який твій улюблений мультфільм/серіал?",
+    "Яку суперсилу ти хотіла б мати?",
+    "Яка твоя найбільша мрія?",
+    "Який предмет у школі тобі подобається найбільше?",
+    "Який предмет у школі ти б прибрала назавжди?",
+    "Який твій найулюбленіший смаколик?",
+    "Куди ти найбільше хочеш поїхати?",
+    "Яка твоя найбільша смішна звичка?",
+    "Що ти робиш, коли тобі нудно?",
+    "Який день народження був для тебе найкращим?",
+    "Яка твоя улюблена гра?",
+    "Що ти найбільше цінуєш у друзях?",
+    "Яка твоя найсмішніша дитяча історія?",
+    "Який персонаж найбільше схожий на тебе?",
+    "Що ти вибереш: море чи гори?",
+    "Що ти вибереш: TikTok чи YouTube?",
+    "Що ти вибереш: ніколи не користуватися телефоном тиждень чи не їсти солодке місяць?",
+    "Яка твоя улюблена пора року і чому?",
+    "Який подарунок ти мрієш отримати?",
+    "Яка риса характеру тобі в собі подобається найбільше?",
+    "Яку навичку ти хотіла б навчитися?",
+    "Який момент цього року ти хотіла б повторити?",
+    "Хто з друзів найкраще вміє тебе розсмішити?",
+    "Який найдивніший сон ти пам’ятаєш?",
+    "Яку пісню ти можеш слухати 100 разів?",
+    "Яка твоя улюблена соцмережа?",
+    "Якби ти могла на один день стати знаменитістю — ким би стала?",
+    "Якби ти могла придумати власне свято — яке б воно було?"
+  ];
+
+  /* =====================================================
+     ЗАВДАННЯ ДЛЯ "ДІЇ"
+     Так само — замініть або додайте свої рядки.
+     ===================================================== */
+  const dares = [
+    "Станцюй 20 секунд так, ніби ти головна зірка TikTok.",
+    "Покажи без слів тваринку, яку загадають інші.",
+    "Заспівай приспів будь-якої пісні.",
+    "Протягом хвилини говори голосом мультяшного персонажа.",
+    "Зроби 5 смішних поз для фото.",
+    "Покажи свій найсмішніший танцювальний рух.",
+    "Пройдися по кімнаті як модель на показі мод.",
+    "Зобрази вчителя, а інші нехай вгадають кого.",
+    "Станцюй під пісню, яку вибере компанія.",
+    "Протягом наступних 2 хвилин відповідай тільки «так» або «ні».",
+    "Скажи кожному гравцю по одному компліменту.",
+    "Зобрази знаменитість, а всі нехай вгадають хто це.",
+    "Розсміши людину навпроти себе, не торкаючись її.",
+    "Покажи емоцію «я щойно виграла мільйон».",
+    "Зроби смішне селфі з трьома учасниками.",
+    "Придумай рекламу будь-якого предмета, який є в кімнаті.",
+    "Протягом 30 секунд танцюй без музики.",
+    "Покажи, як ти виглядаєш, коли запізнилася до школи.",
+    "Зобрази свій ранок понеділка без слів.",
+    "Придумай новий танцювальний рух і навчи йому всіх.",
+    "Скажи скоромовку тричі поспіль.",
+    "Зроби комплімент собі перед усіма.",
+    "Протягом хвилини ходи тільки задом наперед.",
+    "Покажи пантомімою фільм/мультфільм, який загадають.",
+    "Зобрази людину, яка побачила величезного павука.",
+    "Станцюй танець робота.",
+    "Придумай смішне привітання для іменинниці.",
+    "Заспівай будь-яку пісню, використовуючи тільки звук «ля».",
+    "Зроби 10 секунд «замороженого танцю» — рухайся, поки музика грає, і завмри, коли вона зупиниться.",
+    "Протягом одного кола говори про себе у третій особі."
+  ];
+
+  /* =====================================================
+     ЛОГІКА ГРИ (нижче нічого міняти не потрібно)
+     ===================================================== */
+  const EMPTY_MESSAGE = "Питання з цієї категорії закінчилися! 😅";
+  const FLIP_LOCK_MS = 850; // трохи більше за тривалість анімації
+
+  class Deck {
+    constructor(items) {
+      // Копія масиву — пул доступних питань, з якого вони видаляються
+      this.pool = [...items];
+    }
+    get left() { return this.pool.length; }
+    // Дістає випадковий елемент і одразу видаляє його з пулу — повтор неможливий
+    draw() {
+      if (!this.pool.length) return null;
+      const i = Math.floor(Math.random() * this.pool.length);
+      return this.pool.splice(i, 1)[0];
+    }
+  }
+
+  class CardController {
+    constructor(cardId, textId, leftId, deck, board) {
+      this.card = document.getElementById(cardId);
+      this.textEl = document.getElementById(textId);
+      this.leftEl = document.getElementById(leftId);
+      this.deck = deck;
+      this.board = board;
+      this.locked = false;
+      this.updateLeft();
+
+      this.card.addEventListener('click', () => this.onClick());
+      this.card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.onClick(); }
+      });
+    }
+
+    updateLeft() {
+      this.leftEl.textContent = this.deck.left > 0 ? `Залишилось: ${this.deck.left}` : 'Все зіграно';
+    }
+
+    onClick() {
+      if (this.locked) return;
+      // Якщо картка вже перевернута — повертаємо назад
+      if (this.card.classList.contains('flipped')) { this.flip(false); return; }
+
+      const item = this.deck.draw();
+      if (item === null) { this.showEmpty(); return; }
+
+      this.textEl.textContent = item;
+      this.updateLeft();
+      this.flip(true);
+    }
+
+    flip(toBack) {
+      this.locked = true;
+      this.card.classList.toggle('flipped', toBack);
+      this.board.classList.toggle('has-flipped', toBack);
+      setTimeout(() => { this.locked = false; }, FLIP_LOCK_MS);
+    }
+
+    showEmpty() {
+      this.card.classList.add('empty', 'shake');
+      setTimeout(() => this.card.classList.remove('shake'), 500);
+      showToast(EMPTY_MESSAGE);
+    }
+  }
+
+  // Сповіщення
+  const toastEl = document.getElementById('toast');
+  let toastTimer;
+  function showToast(message) {
+    toastEl.textContent = message;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
+  }
+
+  const board = document.getElementById('board');
+  new CardController('card-truth', 'text-truth', 'left-truth', new Deck(truths), board);
+  new CardController('card-dare', 'text-dare', 'left-dare', new Deck(dares), board);
+</script>
+</body>
+</html>
